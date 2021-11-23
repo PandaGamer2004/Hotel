@@ -40,6 +40,7 @@ namespace Hotel.PRLAYER
             services.AddTransient<IGuestService, GuestService>();
             services.AddTransient<ICategoryDateService, CategoryDateService>();
             services.AddTransient<IReportInfoService, ReportService>();
+            services.AddTransient<IStayService, StayService>();
             services.AddTransient<IBookingAndCheckInService, BookinAndCheckInService>();
             
             

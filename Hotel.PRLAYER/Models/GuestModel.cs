@@ -31,7 +31,6 @@ namespace Hotel.PRLAYER.Models
 
         
         
-        [BindNever]
         public virtual GuestRegisterInfoModel GuestRegisterInfo { get; set; }
         
         [BindNever]

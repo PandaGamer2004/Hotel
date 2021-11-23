@@ -13,6 +13,7 @@ namespace Hotel.PRLAYER.Controler
 {
     [ApiController]
     [Route("api/[controller]")]
+    [Authorize(Roles ="User")]
     public class CategoryController : Controller
     {
         private IMapperItem _mapper;

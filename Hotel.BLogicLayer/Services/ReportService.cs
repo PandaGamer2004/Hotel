@@ -14,7 +14,6 @@ namespace Hotel.BLogicLayer.Services
         private IStayService _stayService;
         private IRoomService _roomService;
         private ICategoryDateService _categoryDateService;
-        private IMapperItem _mapperItem;
         
         
         public ReportService(ICategoryDateService categoryDateService, IRoomService roomService, IStayService stayService)

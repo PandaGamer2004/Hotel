@@ -29,7 +29,6 @@ namespace Hotel.PRLAYER.Controler
 
         
         [HttpGet]
-        [Route("Bookings")]
         public IActionResult GetBookings()
         {
             var bookings = _stayService.GetBookings();
@@ -45,7 +44,6 @@ namespace Hotel.PRLAYER.Controler
         
         [Authorize(Roles = "User")]
         [HttpGet]
-        [Route("RoomsOnDate")]
         public IActionResult GetFreeRomsOnDate(DateStartEndPair datePair)
         {
             if (ModelState.IsValid)
@@ -64,7 +62,6 @@ namespace Hotel.PRLAYER.Controler
         
         [HttpPost]
         [Authorize(Roles = "User")]
-        [Route("CreateBooking")]
         public IActionResult CreateBooking(Guid roomId,DateStartEndPair datePair )
         {
             return CreateStay((Guid guestId) =>
@@ -106,6 +103,7 @@ namespace Hotel.PRLAYER.Controler
                 }
                 catch (AuthenticationException ae)
                 {
+                    Debug.WriteLine(ae.Message);
                     return StatusCode(401);
                 }
             }
@@ -130,7 +128,6 @@ namespace Hotel.PRLAYER.Controler
 
 
         [HttpPut]
-        [Authorize(Roles = "Admin")]
         public IActionResult CheckOut(Guid roomId, DateTime chekOutDate)
         {
             if (ModelState.IsValid)

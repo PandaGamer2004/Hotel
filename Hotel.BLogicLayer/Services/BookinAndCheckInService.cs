@@ -14,9 +14,10 @@ namespace Hotel.BLogicLayer.Services
         private IStayService _stayService;
         private IRoomService _roomService;
         
-        public BookinAndCheckInService(IStayService stayService)
+        public BookinAndCheckInService(IStayService stayService, IRoomService roomService)
         {
             _stayService = stayService;
+            _roomService = roomService;
         }
 
 

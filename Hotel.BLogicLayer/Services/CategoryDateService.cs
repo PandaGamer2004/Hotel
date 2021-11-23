@@ -65,7 +65,7 @@ namespace Hotel.BLogicLayer.Services
                 .Where(date => date.CategoryId == categoryDateEntity.CategoryId);
 
             var datesWithEqualCategoryId = categoryDatesWithEqualCategoryId as CategoryDateDto[] ?? categoryDatesWithEqualCategoryId.ToArray();
-            if (datesWithEqualCategoryId.Count() == 1)
+            if (datesWithEqualCategoryId.Count() != 0)
             {
                 throw new ArgumentOutOfRangeException(nameof(categoryDateId));
             }

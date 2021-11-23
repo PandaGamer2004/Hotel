@@ -59,6 +59,11 @@ namespace Hotel.DAL.Сontexts
 
             modelBuilder.Entity<Role>().HasData(
                 new Role {Id = Guid.NewGuid(), RoleName = "User"});
+
+            var adminRole = new Role { Id = Guid.NewGuid(), RoleName = "Admin" };
+            modelBuilder.Entity<Role>().HasData(
+               adminRole);
+
             
             base.OnModelCreating(modelBuilder);
         }

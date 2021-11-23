@@ -26,20 +26,20 @@ namespace Hotel.PRLAYER.Controler
             _roleService = roleService;
             _guestService = guestService;
         }
-        
 
-        [Route("Register")]
+
+
         [HttpPost]
-        public IActionResult RegisterUser(GuestModel model, GuestRegisterInfoModel gf)
+        public IActionResult RegisterUser(GuestModel model)
         {
             if (ModelState.IsValid)
             {
                 try
                 {
-                    var userRole = _roleService.GetRoleByName("User");
-                    gf.RoleId = userRole.Id;
+                    string roleName = "User";
+                    var userRole = _roleService.GetRoleByName(roleName);
+                    model.GuestRegisterInfo.RoleId = userRole.Id;
                     model.Id = Guid.NewGuid();
-                    model.GuestRegisterInfo = gf;
                     _guestService.CreateGuest(_mapperItem.Mapper.Map<GuestDto>(model));
                     return Ok();
                 }
@@ -47,7 +47,7 @@ namespace Hotel.PRLAYER.Controler
                 {
                     Debug.WriteLine(kf.Message);
                     Debug.WriteLine("System Error. Not found Role!");
-                    throw;
+                    return StatusCode(500);
                 }
                 catch (GuestEmailAlreadyExistException ge)
                 {
@@ -64,35 +64,41 @@ namespace Hotel.PRLAYER.Controler
             return BadRequest(ModelState);
         }
 
-        [Route("Login")]
-        [HttpPost]
+
+        [HttpPost("Token")]
         public IActionResult GetToken(LogInModel model)
         {
             if (ModelState.IsValid)
             {
-                var identity = GetIdentity(model.Email, model.Password);
-                if (identity != null)
+                try
                 {
-                    var now = DateTime.UtcNow;
-
-                    var jwt = new JwtSecurityToken(
-                        issuer: AuthOptions.ISSUER,
-                        audience: AuthOptions.AUDIENCE,
-                        notBefore: now,
-                        claims: identity.Claims,
-                        expires: now.Add(TimeSpan.FromMinutes(AuthOptions.LIFETIME)),
-                        signingCredentials: new SigningCredentials(AuthOptions.SymmetricSecurityKey,  SecurityAlgorithms.HmacSha256)
-                        );
-
-                    var encodedJwt = new JwtSecurityTokenHandler().WriteToken(jwt);
-
-                    var response = new
+                    var identity = GetIdentity(model.Email, model.Password);
+                    if (identity != null)
                     {
-                        access_token = encodedJwt,
-                        username = identity.Name
-                    };
+                        var now = DateTime.UtcNow;
 
-                    return Json(response);
+                        var jwt = new JwtSecurityToken(
+                            issuer: AuthOptions.ISSUER,
+                            audience: AuthOptions.AUDIENCE,
+                            notBefore: now,
+                            claims: identity.Claims,
+                            expires: now.Add(TimeSpan.FromMinutes(AuthOptions.LIFETIME)),
+                            signingCredentials: new SigningCredentials(AuthOptions.SymmetricSecurityKey, SecurityAlgorithms.HmacSha256)
+                            );
+
+                        var encodedJwt = new JwtSecurityTokenHandler().WriteToken(jwt);
+
+                        var response = new
+                        {
+                            access_token = encodedJwt,
+                            username = identity.Name
+                        };
+
+                        return Json(response);
+                    }
+                }catch(ArgumentException)
+                {
+                    return StatusCode(500);
                 }
             }
 
@@ -100,7 +106,8 @@ namespace Hotel.PRLAYER.Controler
         }
 
 
-        private ClaimsIdentity GetIdentity(String email, String password)
+        [NonAction]
+        public ClaimsIdentity GetIdentity(String email, String password)
         {
 
             try
@@ -113,7 +120,7 @@ namespace Hotel.PRLAYER.Controler
                     new Claim(ClaimsIdentity.DefaultRoleClaimType, guestRole.RoleName), 
                 };
                 ClaimsIdentity claimsIdentity =
-                    new(claims, "Token", ClaimsIdentity.DefaultNameClaimType,
+                    new ClaimsIdentity(claims, "Token", ClaimsIdentity.DefaultNameClaimType,
                         ClaimsIdentity.DefaultRoleClaimType);
                 return claimsIdentity;
             }
@@ -125,6 +132,7 @@ namespace Hotel.PRLAYER.Controler
             catch (ArgumentException ae)
             {
                 Debug.WriteLine(ae.Message);
+                throw;
             }
 
             return null;
