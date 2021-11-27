@@ -4,6 +4,7 @@ using Hotel.BLogicLayer.Services;
 using Hotel.DAL.Interfaces;
 using Hotel.DAL.Repositories;
 using Hotel.DAL.Сontexts;
+using Hotel.PRLAYER.Infrastructure;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -45,7 +46,10 @@ namespace Hotel.PRLAYER
             
             
             //MVC OPTIONS
-            services.AddControllersWithViews();
+            services.AddControllersWithViews(opts =>
+            {
+               
+            });
             
             //AUTHENTICATION
             services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)

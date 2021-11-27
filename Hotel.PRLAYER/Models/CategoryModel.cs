@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using Hotel.BLogicLayer.DTO;
+using Microsoft.AspNetCore.Mvc.ModelBinding;
 
 namespace Hotel.PRLAYER.Models
 {
@@ -10,7 +11,7 @@ namespace Hotel.PRLAYER.Models
         public Guid Id { get; set; }
         
         [Required]
-        [StringLength(40, MinimumLength = 10)]
+        [StringLength(40, MinimumLength = 3)]
         public String CategoryName { get; set; }
         
         
@@ -18,7 +19,11 @@ namespace Hotel.PRLAYER.Models
         [Range(1, 5)]
         public Int32 BedCount { get; set; }
 
+
+        [BindNever]
         public virtual ICollection<RoomModel> Room { get; set; } = new List<RoomModel>();
+
+        [BindNever]
         public virtual ICollection<CategoryDateModel> CategoryDate { get; set; } = new List<CategoryDateModel>();
     }
 }

@@ -9,7 +9,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Hotel.BLogicLayer", "Hotel.
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Hotel.PRLAYER", "Hotel.PRLAYER\Hotel.PRLAYER.csproj", "{6067EEC3-CFD8-4A82-B733-991FF7275E23}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Hotel.Testst", "Hotel.Testst\Hotel.Testst.csproj", "{96D45DE9-A102-46D8-86DC-C7295271492E}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Hotel.Testst", "Hotel.Testst\Hotel.Testst.csproj", "{96D45DE9-A102-46D8-86DC-C7295271492E}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

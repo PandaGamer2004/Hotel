@@ -6,6 +6,7 @@ namespace Hotel.BLogicLayer.Interfaces
 {
     public interface ICategoryDateService : IDisposable
     {
+        public CategoryDateDto GetCategoryDateWithGivenCategoryId(Guid categoryId);
         public void CreateCategoryDate(CategoryDateDto categoryDate);
         public void DeleteCategoryDate(Guid categoryDateId);
         public void UpdateCategoryDate(CategoryDateDto categoryDateToUpdate);

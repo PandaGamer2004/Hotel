@@ -13,7 +13,6 @@ namespace Hotel.PRLAYER.Controler
 {
     [ApiController]
     [Route("api/[controller]")]
-    [Authorize(Roles ="User")]
     public class CategoryController : Controller
     {
         private IMapperItem _mapper;
@@ -26,7 +25,7 @@ namespace Hotel.PRLAYER.Controler
             _categoryDateService = categoryDateService;
         }
 
-        [Authorize]
+       
         [HttpGet]
         public IActionResult GetCategories()
         {
@@ -40,72 +39,100 @@ namespace Hotel.PRLAYER.Controler
         }
 
         [HttpPost]
-        public IActionResult CreateCategory([Bind("CategoryName", "BedCount")]CategoryModel categoryModel, Decimal price)
+        public IActionResult CreateCategory(CategoryCreateModel categoryCreateModel)
         {
             if (ModelState.IsValid)
             {
-                if (price <= 0)
+                if (categoryCreateModel.Price <= 0)
                 {
                     ModelState.AddModelError("", "Price can't be equal a lower than zero");
                 }
                 else
                 {
-
-                    categoryModel.Id = Guid.NewGuid();
-                    CreateCategoryDate(price, categoryModel.Id);
-                    var mappedCategoryModel = _mapper.Mapper.Map<CategoryDto>(categoryModel);
-
-                    _categoryService.CreateCategory(mappedCategoryModel);
-                    return Created(HttpContext.Request.Path.Value, categoryModel);
-                }
-            }
-            return BadRequest(ModelState);
-        }
-
-
-        [HttpPut]
-        public IActionResult UpdateCategory([Bind("Id", "CategoryName", "BedCount")]CategoryModel categoryModel)
-        {
-            if (ModelState.IsValid)
-            {
-                if (_categoryService.GetCategory(categoryModel.Id) == null)
-                {
-                    
-                    ModelState.AddModelError("", "Can't find category to update");
-                    var mappedCategory = _mapper.Mapper.Map<CategoryDto>(categoryModel);
-                    _categoryService.UpdateCategory(mappedCategory);
-
-                    return Ok();
-                }
-            }
-
-            return BadRequest(ModelState);
-        }
-
-
-        [HttpPut]
-        public IActionResult UpdateCategoryDate([Bind("Id", "StartDate", "EndDate", "Price", "CategoryId")]
-            CategoryDateModel categoryDateModel)
-        {
-            if (ModelState.IsValid)
-            {
-                if (_categoryDateService.GetCategoryDate(categoryDateModel.Id) != null && _categoryService.GetCategory(categoryDateModel.CategoryId) != null)
-                {
                     try
                     {
-                        var mappedCategoryDateToDto = _mapper.Mapper.Map<CategoryDateDto>(categoryDateModel);
-                        _categoryDateService.UpdateCategoryDate(mappedCategoryDateToDto);
+                        var categoryModel = new CategoryModel
+                        {
+                            Id = Guid.NewGuid(),
+                            BedCount = categoryCreateModel.BedCount,
+                            CategoryName = categoryCreateModel.CategoryName
+                        };
+
+                        CreateCategoryDateAndSendToDb(categoryCreateModel.Price, categoryModel.Id);
+                        var mappedCategoryModel = _mapper.Mapper.Map<CategoryDto>(categoryModel);
+
+                        _categoryService.CreateCategory(mappedCategoryModel);
+                        return Created(HttpContext.Request.Path.Value, categoryModel);
                     }
                     catch (ArgumentException ae)
                     {
                         Debug.WriteLine(ae.Message);
-                        ModelState.AddModelError("StartDate", "Can't update CategoryDate that's intersects with other");
+                        ModelState.AddModelError("", "It's not possible create category that already exists");
                     }
                 }
-                else
+            }
+            return BadRequest(ModelState);
+        }
+
+
+        [HttpPut]
+        public IActionResult UpdateCategory(CategoryToUpdateModel categoryToUpdateModel)
+        {
+            if (ModelState.IsValid)
+            {
+                try
                 {
-                    ModelState.AddModelError("CategoryId", "Can't find category or categoryDate to Update.");
+                    var categoryModel = new CategoryModel
+                    {
+                        Id = categoryToUpdateModel.Id,
+                        BedCount = categoryToUpdateModel.BedCount,
+                        CategoryName = categoryToUpdateModel.CategoryName,
+                    };
+
+                    var categoryDateToUpdate =
+                        _categoryDateService.GetCategoryDateWithGivenCategoryId(categoryModel.Id);
+
+                    categoryDateToUpdate.Price = categoryToUpdateModel.Price;
+  
+                    var mappedCategory = _mapper.Mapper.Map<CategoryDto>(categoryModel);
+                    _categoryService.UpdateCategory(mappedCategory);
+                    _categoryDateService.UpdateCategoryDate(categoryDateToUpdate);
+
+                    return Ok();
+                }catch(ArgumentException ae)
+                {
+                    Debug.WriteLine(ae.Message);
+                    return NotFound();
                 }
+              }
+            
+            return BadRequest(ModelState);
+        }
+
+
+        [HttpPut]
+        [Route("CategoryDate")]
+        public IActionResult UpdateCategoryDate([Bind("Id", "StartDate", "EndDate", "Price")]
+            CategoryDateModel categoryDateModel)
+        {
+            if (ModelState.IsValid)
+            {
+                try
+                {
+                    var mappedCategoryDateToDto = _mapper.Mapper.Map<CategoryDateDto>(categoryDateModel);
+                    _categoryDateService.UpdateCategoryDate(mappedCategoryDateToDto);
+                }
+                catch (ArgumentException ae)
+                {
+                    Debug.WriteLine(ae.Message);
+                    ModelState.AddModelError("StartDate", "Can't update CategoryDate that's intersects with other");
+                }
+                catch(KeyNotFoundException ke)
+                {
+                    Debug.WriteLine(ke.Message);
+                    return NotFound();
+                }
+                
             }
 
             return BadRequest(ModelState);
@@ -117,14 +144,15 @@ namespace Hotel.PRLAYER.Controler
         {
             if (ModelState.IsValid)
             {
-                if (_categoryService.GetCategory(categoryIdToDelete) != null)
+                try             
                 {
                     _categoryService.DeleteCategory(categoryIdToDelete);
                     return Ok();
                 }
-                else
+                catch(ArgumentException ae)
                 {
-                    ModelState.AddModelError("","Can't delete Category with given Id");
+                    Debug.WriteLine(ae.Message);
+                    return NotFound();
                 }
             }
 
@@ -132,17 +160,19 @@ namespace Hotel.PRLAYER.Controler
         }
 
         [HttpDelete]
+        [Route("CategoryDate")]
         public IActionResult DeleteCategoryDate(Guid categoryDateToDelete)
         {
             if(ModelState.IsValid)
             {
-                if (_categoryDateService.GetCategoryDate(categoryDateToDelete) != null)
+                try
                 {
                     _categoryDateService.DeleteCategoryDate(categoryDateToDelete);
                 }
-                else
+                catch(KeyNotFoundException ae)
                 {
-                    ModelState.AddModelError("", "Can't delete CategoryDate with given Id");
+                    Debug.WriteLine(ae.Message);
+                    return NotFound();
                 }
             }
 
@@ -150,7 +180,7 @@ namespace Hotel.PRLAYER.Controler
         }
         
 
-        private void CreateCategoryDate(Decimal price, Guid categoryModelId)
+        private void CreateCategoryDateAndSendToDb(Decimal price, Guid categoryModelId)
         {
             var categoryDate = new CategoryDateModel()
             {

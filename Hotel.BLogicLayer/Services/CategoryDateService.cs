@@ -20,6 +20,10 @@ namespace Hotel.BLogicLayer.Services
         }
 
 
+        private void ThrowKeyNotFoundExWhenCategoryDateNotInDb(Guid categoryDateId)
+        {
+            if(_dataBaseUnitOfWork.CategoryDates.Get(categoryDateId) is null) throw new KeyNotFoundException("Can't find CategoryDate with given Id");
+        }
         public void CreateCategoryDate(CategoryDateDto categoryDate)
         {
             if (categoryDate.CategoryId == default(Guid))
@@ -59,6 +63,7 @@ namespace Hotel.BLogicLayer.Services
 
         public void DeleteCategoryDate(Guid categoryDateId)
         {
+            ThrowKeyNotFoundExWhenCategoryDateNotInDb(categoryDateId);
             var categoryDateEntity = GetCategoryDate(categoryDateId);
 
             var categoryDatesWithEqualCategoryId = GetCategoryDates()
@@ -90,9 +95,17 @@ namespace Hotel.BLogicLayer.Services
             _dataBaseUnitOfWork.CategoryDates.Delete(categoryDateId);
         }
 
+        public CategoryDateDto GetCategoryDateWithGivenCategoryId(Guid categoryId)
+        {
+            var lastCategoryDateWithGivenCategoryId
+                = _dataBaseUnitOfWork.CategoryDates
+                .GetAll(filter: categoryDate => categoryDate.CategoryId == categoryId).Last();
+            return _mapperItem.Mapper.Map<CategoryDateDto>(lastCategoryDateWithGivenCategoryId);
+        }
+
         public void UpdateCategoryDate(CategoryDateDto categoryDateToUpdate)
         {
-            
+            ThrowKeyNotFoundExWhenCategoryDateNotInDb(categoryDateToUpdate.Id);
             //TODO MAKE REPO MEHODS AND MAKE LOGIC IN MEMORY
             var dates = GetCategoryDates().Where(ct => ct.CategoryId == categoryDateToUpdate.Id);
 
@@ -120,6 +133,7 @@ namespace Hotel.BLogicLayer.Services
                 _dataBaseUnitOfWork.CategoryDates.GetAll());
         }
 
+       
         public CategoryDateDto GetCategoryDate(Guid id)
         {
             

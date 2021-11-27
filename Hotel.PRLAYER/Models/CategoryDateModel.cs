@@ -1,5 +1,6 @@
 ﻿using System;
 using Hotel.BLogicLayer.DTO;
+using Microsoft.AspNetCore.Mvc.ModelBinding;
 
 namespace Hotel.PRLAYER.Models
 {
@@ -14,6 +15,8 @@ namespace Hotel.PRLAYER.Models
         public Decimal Price { get; set; }
         
         public Guid CategoryId { get; set; }
+
+        [BindNever]
         public virtual CategoryModel Category { get; set; }
     }
 }

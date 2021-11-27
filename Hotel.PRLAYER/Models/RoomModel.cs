@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using Hotel.BLogicLayer.DTO;
+using Microsoft.AspNetCore.Mvc.ModelBinding;
 
 namespace Hotel.PRLAYER.Models
 {
@@ -19,7 +20,10 @@ namespace Hotel.PRLAYER.Models
          
         public Guid CategoryId { get; set; }
         
+
+        [BindNever]
         public virtual CategoryModel Category { get; set; }
+        [BindNever]
         public virtual ICollection<StayModel> Stays { get; set; } = new List<StayModel>();
         
     }

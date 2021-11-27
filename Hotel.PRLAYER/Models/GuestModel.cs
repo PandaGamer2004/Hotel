@@ -1,11 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using Hotel.PRLAYER.Infrastructure;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 
 namespace Hotel.PRLAYER.Models
-{
+{   
+  
     public class GuestModel
     {
         [BindNever]
@@ -29,8 +31,6 @@ namespace Hotel.PRLAYER.Models
         [StringLength(9, MinimumLength = 9)]
         public String PassportNumber { get; set; }
 
-        
-        
         public virtual GuestRegisterInfoModel GuestRegisterInfo { get; set; }
         
         [BindNever]

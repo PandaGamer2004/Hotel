@@ -19,6 +19,13 @@ namespace Hotel.BLogicLayer.Services
             _databaseUnitOfWork = databaseUnitOfWork;
         }
 
+        private void ThrowArgumentExIfCategoryNotInDb(Guid categoryId)
+        {
+            if (_databaseUnitOfWork.Categories.Get(categoryId) is null) throw new ArgumentException("Can't find category with given Id");
+        }
+        
+
+
 
         public void Dispose()
         {
@@ -28,6 +35,10 @@ namespace Hotel.BLogicLayer.Services
         public void CreateCategory(CategoryDto category)
         {
             var categoryFromDto = _mapperItem.Mapper.Map<Category>(category);
+            var equalCategoryCount = _databaseUnitOfWork
+                .Categories
+                .GetAll(filter: ent => ent.CategoryName == category.CategoryName && ent.BedCount == category.BedCount).Count();
+            if (equalCategoryCount != 0) throw new ArgumentException("Can't create category that alredy contains");
             _databaseUnitOfWork.Categories.Create(categoryFromDto);
             _databaseUnitOfWork.Save();
             
@@ -35,6 +46,7 @@ namespace Hotel.BLogicLayer.Services
 
         public void DeleteCategory(Guid categoryId)
         {
+            ThrowArgumentExIfCategoryNotInDb(categoryId);
             _databaseUnitOfWork.Categories.Delete(categoryId);
             _databaseUnitOfWork.Save();
         }
@@ -43,6 +55,8 @@ namespace Hotel.BLogicLayer.Services
 
         public void UpdateCategory(CategoryDto categoryDto)
         {
+
+            ThrowArgumentExIfCategoryNotInDb(categoryDto.Id);
             _databaseUnitOfWork.Categories.Update(
                 _mapperItem.Mapper.Map<Category>(categoryDto)    
                 );
